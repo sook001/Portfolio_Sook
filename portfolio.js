@@ -84,10 +84,52 @@ document.querySelectorAll("[data-preview-toggle]").forEach((button) => {
   }
 
   const iframe = panel.querySelector("iframe[data-preview-src]");
+  const stage = panel.querySelector("[data-preview-stage]");
+  const loaderLabel = panel.querySelector("[data-preview-loader-label]");
+  const progressValue = panel.querySelector("[data-preview-progress]");
+  const progressFill = panel.querySelector("[data-preview-progress-fill]");
 
   if (!iframe) {
     throw new Error(`Preview iframe missing in ${panel.id}.`);
   }
+
+  if (!stage || !loaderLabel || !progressValue || !progressFill) {
+    throw new Error(`Preview loader missing in ${panel.id}.`);
+  }
+
+  let hideLoaderTimer;
+  let progressTimer;
+
+  const setProgress = (value) => {
+    const safeValue = Math.min(100, Math.max(0, value));
+    progressValue.textContent = `${safeValue}%`;
+    progressFill.style.width = `${safeValue}%`;
+  };
+
+  const startProgress = () => {
+    window.clearInterval(progressTimer);
+    setProgress(12);
+    let progress = 12;
+    progressTimer = window.setInterval(() => {
+      progress = Math.min(92, progress + (progress < 40 ? 7 : progress < 70 ? 4 : 2));
+      setProgress(progress);
+    }, 220);
+  };
+
+  iframe.addEventListener("load", () => {
+    window.clearInterval(progressTimer);
+    setProgress(100);
+    window.clearTimeout(hideLoaderTimer);
+    hideLoaderTimer = window.setTimeout(() => {
+      stage.classList.add("is-loaded");
+    }, 280);
+  });
+
+  iframe.addEventListener("error", () => {
+    window.clearInterval(progressTimer);
+    window.clearTimeout(hideLoaderTimer);
+    loaderLabel.textContent = "โหลดเดโมไม่สำเร็จ";
+  });
 
   button.addEventListener("click", () => {
     const opening = button.getAttribute("aria-expanded") !== "true";
@@ -96,6 +138,9 @@ document.querySelectorAll("[data-preview-toggle]").forEach((button) => {
     panel.hidden = !opening;
 
     if (opening) {
+      stage.classList.remove("is-loaded");
+      loaderLabel.textContent = "กำลังโหลดเดโม...";
+      startProgress();
       if (!iframe.getAttribute("src")) {
         iframe.setAttribute("src", iframe.dataset.previewSrc);
       }
@@ -115,8 +160,10 @@ document.querySelectorAll("[data-video-player]").forEach((player) => {
   const nextButton = player.querySelector("[data-video-next]");
   const muteButton = player.querySelector("[data-video-mute]");
   const playButton = player.querySelector("[data-video-play]");
+  const loader = player.querySelector("[data-video-loader]");
+  const loaderLabel = player.querySelector("[data-video-loader-label]");
 
-  if (!video || !title || !counter || !dotsContainer || !previousButton || !nextButton || !muteButton || !playButton) {
+  if (!video || !title || !counter || !dotsContainer || !previousButton || !nextButton || !muteButton || !playButton || !loader || !loaderLabel) {
     throw new Error("Video player is missing required controls.");
   }
 
@@ -127,9 +174,64 @@ document.querySelectorAll("[data-video-player]").forEach((player) => {
     { title: "Nan Final hero", src: "Video/Video/Nan Final hero.mp4" },
   ];
 
+  const frameCanvas = document.createElement("canvas");
+  frameCanvas.className = "hobby-player__frame";
+  frameCanvas.setAttribute("aria-hidden", "true");
+  video.insertAdjacentElement("afterend", frameCanvas);
+  const frameContext = frameCanvas.getContext("2d");
+  if (!frameContext) {
+    throw new Error("Unable to create the video frame canvas.");
+  }
+
   let currentIndex = 0;
   let loadTimer;
+  let hideLoaderTimer;
+  let slowLoaderTimer;
+  let frameTransitionId = 0;
   video.muted = false;
+
+  const showLoader = (message = "กำลังโหลดวิดีโอ...") => {
+    window.clearTimeout(hideLoaderTimer);
+    loaderLabel.textContent = message;
+    loader.classList.remove("is-hidden");
+  };
+
+  const hideLoader = () => {
+    window.clearTimeout(slowLoaderTimer);
+    window.clearTimeout(hideLoaderTimer);
+    hideLoaderTimer = window.setTimeout(() => {
+      loader.classList.add("is-hidden");
+    }, 280);
+  };
+
+  const showSlowLoader = (message) => {
+    window.clearTimeout(slowLoaderTimer);
+    slowLoaderTimer = window.setTimeout(() => {
+      showLoader(message);
+    }, 700);
+  };
+
+  video.addEventListener("loadeddata", () => {
+    const transitionId = frameTransitionId;
+    const hideTransitionFrame = () => {
+      if (transitionId === frameTransitionId) {
+        frameCanvas.classList.remove("is-visible");
+      }
+    };
+
+    if (typeof video.requestVideoFrameCallback === "function") {
+      video.requestVideoFrameCallback(hideTransitionFrame);
+    } else {
+      window.requestAnimationFrame(() => window.requestAnimationFrame(hideTransitionFrame));
+    }
+
+    hideLoader();
+  });
+  video.addEventListener("canplay", hideLoader);
+  video.addEventListener("playing", hideLoader);
+  video.addEventListener("waiting", () => showSlowLoader("กำลังบัฟเฟอร์วิดีโอ..."));
+  video.addEventListener("stalled", () => showSlowLoader("กำลังรอวิดีโอโหลด..."));
+  video.addEventListener("error", () => showSlowLoader("โหลดวิดีโอไม่สำเร็จ"));
 
   const updateMuteControl = () => {
     muteButton.textContent = video.muted ? "เสียงปิด" : "เสียงเปิด";
@@ -160,6 +262,16 @@ document.querySelectorAll("[data-video-player]").forEach((player) => {
     window.clearTimeout(loadTimer);
     currentIndex = (index + playlist.length) % playlist.length;
     const item = playlist[currentIndex];
+    frameTransitionId += 1;
+
+    if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && video.videoWidth > 0) {
+      frameCanvas.width = video.videoWidth;
+      frameCanvas.height = video.videoHeight;
+      frameContext.drawImage(video, 0, 0, frameCanvas.width, frameCanvas.height);
+      frameCanvas.classList.add("is-visible");
+    } else if (!frameCanvas.classList.contains("is-visible")) {
+      frameCanvas.classList.remove("is-visible");
+    }
 
     video.pause();
     video.muted = false;

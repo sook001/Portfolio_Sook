@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loading Animation Examples</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="gallery">
+      <header class="gallery__header">
+        <div>
+          <p class="eyebrow">LOADING CONCEPTS</p>
+          <h1>ตัวอย่าง Loading Animation</h1>
+        </div>
+        <button class="replay-all" type="button" id="replay-all">Replay all</button>
+      </header>
+
+      <section class="examples" aria-label="ตัวอย่าง Loading Animation">
+        <article class="example" data-example>
+          <div class="example__heading">
+            <div><span>01</span><h2>Orbit Loader</h2></div>
+            <input type="radio" name="loader-choice" value="orbit" aria-label="เลือก Orbit Loader" />
+          </div>
+          <div class="preview preview--orbit">
+            <div class="orbit-loader" aria-label="กำลังโหลด">
+              <div class="orbit-loader__core"></div>
+              <div class="orbit-loader__ring orbit-loader__ring--one"><i></i></div>
+              <div class="orbit-loader__ring orbit-loader__ring--two"><i></i></div>
+              <span>LOADING</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="example" data-example>
+          <div class="example__heading">
+            <div><span>02</span><h2>Progress Loader</h2></div>
+            <input type="radio" name="loader-choice" value="progress" aria-label="เลือก Progress Loader" />
+          </div>
+          <div class="preview preview--progress">
+            <div class="progress-loader">
+              <div class="progress-loader__meta">
+                <span>Loading demo</span>
+                <strong data-progress-value>68%</strong>
+              </div>
+              <div class="progress-loader__track"><i></i></div>
+              <small>INITIALIZING ASSETS</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="example" data-example>
+          <div class="example__heading">
+            <div><span>03</span><h2>Scanning Loader</h2></div>
+            <input type="radio" name="loader-choice" value="scan" aria-label="เลือก Scanning Loader" />
+          </div>
+          <div class="preview preview--scan">
+            <div class="scan-loader">
+              <span class="scan-loader__corner scan-loader__corner--tl"></span>
+              <span class="scan-loader__corner scan-loader__corner--tr"></span>
+              <span class="scan-loader__corner scan-loader__corner--bl"></span>
+              <span class="scan-loader__corner scan-loader__corner--br"></span>
+              <div class="scan-loader__beam"></div>
+              <div class="scan-loader__mark">SOOK</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="example" data-example>
+          <div class="example__heading">
+            <div><span>04</span><h2>Logo Pulse</h2></div>
+            <input type="radio" name="loader-choice" value="pulse" aria-label="เลือก Logo Pulse" />
+          </div>
+          <div class="preview preview--pulse">
+            <div class="pulse-loader" aria-label="กำลังโหลด">
+              <span class="pulse-loader__halo"></span>
+              <span class="pulse-loader__logo">S</span>
+              <strong>SOOK PORTFOLIO</strong>
+              <small>กำลังเตรียมเนื้อหา</small>
+            </div>
+          </div>
+        </article>
+
+        <article class="example" data-example>
+          <div class="example__heading">
+            <div><span>05</span><h2>Skeleton Loader</h2></div>
+            <input type="radio" name="loader-choice" value="skeleton" aria-label="เลือก Skeleton Loader" />
+          </div>
+          <div class="preview preview--skeleton">
+            <div class="skeleton-loader" aria-label="กำลังโหลดเนื้อหา">
+              <div class="skeleton-loader__image skeleton"></div>
+              <div class="skeleton-loader__body">
+                <div class="skeleton skeleton--tag"></div>
+                <div class="skeleton skeleton--title"></div>
+                <div class="skeleton skeleton--line"></div>
+                <div class="skeleton skeleton--line skeleton--short"></div>
+                <div class="skeleton-loader__tags">
+                  <div class="skeleton skeleton--pill"></div>
+                  <div class="skeleton skeleton--pill"></div>
+                  <div class="skeleton skeleton--pill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
