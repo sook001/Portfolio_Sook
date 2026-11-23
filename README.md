@@ -1,7 +1,7 @@
 # Portfolio
 
 A static portfolio website with small, playable project previews.
-Open https://sook001.github.io/Portfolio-/
+Open https://sook001.github.io/Portfolio_Sook/
 
 ## Run locally
 
